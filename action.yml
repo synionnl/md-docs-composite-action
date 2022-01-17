@@ -38,23 +38,21 @@ runs:
       id: branches
       run: |
         md-docs -b
-        cat <<< $(jq 'del(.[] | select(.name == "gh-pages"))' ./dist/branches.json) > ./dist/branches.json
-        jq 'del(.[] | select(.name == "gh-pages"))' ./dist/branches.json > ./dist/branches.json
         BRANCHES=$(cat ./dist/branches.json)
         echo "::set-output name=value::${BRANCHES//'%'/'%25'}"
 
     - name: Build websites
       shell: bash
-      env:
-        THEME: ${{ inputs.theme }}
-        BRANCHES: ${{ steps.branches.outputs.value }}
       run: |
         git fetch
         for B in $(echo $BRANCHES | jq -r 'sort_by(.path) | .[].name')
         do
             git checkout "$B"
-            md-docs -t $THEME
+            md-docs -t $THEME -s gh-pages
         done
+      env:
+        THEME: ${{ inputs.theme }}
+        BRANCHES: ${{ steps.branches.outputs.value }}
 
     - name: Deploy
       uses: peaceiris/actions-gh-pages@v3
