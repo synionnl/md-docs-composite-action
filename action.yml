@@ -38,6 +38,7 @@ runs:
       id: branches
       run: |
         md-docs -b
+        cat <<< $(jq 'del(.[] | select(.name == "gh-pages"))' ./dist/branches.json) > ./dist/branches.json
         jq 'del(.[] | select(.name == "gh-pages"))' ./dist/branches.json > ./dist/branches.json
         BRANCHES=$(cat ./dist/branches.json)
         echo "::set-output name=value::${BRANCHES//'%'/'%25'}"
