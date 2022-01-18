@@ -6,6 +6,7 @@ Github action to publish test execution files to Azure and trigger living docume
 
 ```
 - name: Build and Deploy
+  if: always()
   uses: synionnl/md-docs-actions/publish@v1
   with:
     github_token: ${{ secrets.GITHUB_TOKEN }}

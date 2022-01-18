@@ -19,8 +19,11 @@ exports.getClient = function(githubClient) {
             const globber = await glob.create(`${path.dirname(file)}/**/${executionFile}`);
             const files = await globber.glob();
 
-            if (files.length === 0)
-                throw new Error(`${executionFile} not found in ${path.dirname(file)}.`)
+            if (files.length === 0) {
+                core.warning(`${executionFile} not found in ${path.dirname(file)}.`);
+                config.execution = null;
+                return config;
+            }
             
             config.execution.file = files[0];
             

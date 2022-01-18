@@ -41,14 +41,20 @@ async function run() {
 async function getTestExecutions(files) {
   core.startGroup('Get test executions');
   
-  if (files.length === 0)
-    throw Error('No living documentation files found.');
+  if (files.length === 0) {
+    core.warning('No living documentation files found.');
+    return;
+  }
 
   core.debug(`${files.length} living documentation files found.`);
 
   const promisess = files
     .map(async (file) => {
       const ld = await ldClient.parseFile(file);
+
+      if (ld.execution == null)
+        return [];
+      
       core.debug(`${file} contains a reference to test execution file ${ld.execution.file}.`);
 
       if (ld.branches == undefined || ld.branches.length === 0)
@@ -91,7 +97,7 @@ async function uploadTestExecutionFiles(executions) {
   core.startGroup('Upload files');
 
   if (executions.length === 0)
-    throw Error('No test executions found.');
+    core.warning('No test executions found.');
 
   await Promise.all(executions.map(execution => azureClient.upload(execution.bucket, execution.file)));
 
