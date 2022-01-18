@@ -1,0 +1,93 @@
+name: md-docs azure
+
+description: Deploy generated website to Azure
+
+inputs:
+  
+  theme: 
+    description: Path to a theme css file.
+    required: false
+  
+  azure_credentials:
+    description: Azure credentials used to login.
+    required: true
+
+  resource-group:
+    description: Name of the Azure resource group.
+    required: true
+
+  storage_account:
+    description: Name of the Azure storage account.
+    required: true
+
+  storage_container:
+    description: Name of the Azure storage container inside the storage acount.
+    required: true
+
+  storage_bucket:
+    description: Directory where to deploy the generated website in the container. Defaults to empty which is the root.
+    required: false
+
+  cdn_profile:
+    description: Name of the Azure cdn profile which is linked to the storage container.
+    required: true
+
+  cdn_endpoint:
+    description: Name of the Azure cdn endpoint which is linked to the storage container.
+    required: true
+
+runs:
+
+  using: composite
+  
+  steps:
+    - name: Build
+      uses: ../build
+      with:
+          theme: ${{ inputs.theme }}
+
+    - name: Azure login
+      uses: azure/login@v1
+      with:
+        creds: ${{ inputs.azure_credentials }}
+
+    - name: Deploy to Azure
+      if: inputs.bucket == null || inputs.bucket == ''
+      uses: azure/CLI@v1
+      env:
+        RESOURCE_GROUP: ${{ inputs.resource_group }}
+        STORAGE_ACCOUNT: ${{ inputs.storage_account }}
+        STORAGE_CONTAINER: ${{ inputs.storage_container }}
+        CDN_PROFILE: ${{ inputs.cdn_profile }}
+        CDN_ENDPOINT: ${{ inputs.cdn_endpoint }}
+      with:
+        inlineScript: |
+          az config set extension.use_dynamic_install=yes_without_prompt
+          az storage container create -n "$STORAGE_CONTAINER" --account-name "$STORAGE_ACCOUNT" --public-access container --auth-mode login
+          az storage azcopy blob delete -c "$STORAGE_CONTAINER" --account-name "$STORAGE_ACCOUNT" --recursive
+          az storage azcopy blob upload -c "$STORAGE_CONTAINER" -s "./main/dist/*" --account-name "$STORAGE_ACCOUNT" --recursive
+          az cdn endpoint purge --content-paths  "/*" --profile-name "$CDN_PROFILE" --name "$CDN_ENDPOINT" --resource-group "$RESOURCE_GROUP"
+
+    - name: Deploy bucket to Azure
+      if: inputs.bucket != null && inputs.bucket != ''
+      uses: azure/CLI@v1
+      env:
+        RESOURCE_GROUP: ${{ inputs.resource_group }}
+        STORAGE_ACCOUNT: ${{ inputs.storage_account }}
+        STORAGE_CONTAINER: ${{ inputs.storage_container }}
+        STORAGE_BUCKET: ${{ inputs.storage_bucket }}
+        CDN_PROFILE: ${{ inputs.cdn_profile }}
+        CDN_ENDPOINT: ${{ inputs.cdn_endpoint }}
+      with:
+        inlineScript: |
+          az config set extension.use_dynamic_install=yes_without_prompt
+          az storage container create -n "$STORAGE_CONTAINER" --account-name "$STORAGE_ACCOUNT" --public-access container --auth-mode login
+          az storage azcopy blob delete -c "$STORAGE_CONTAINER" -t "$STORAGE_BUCKET" --account-name "$STORAGE_ACCOUNT" --recursive
+          az storage azcopy blob upload -c "$STORAGE_CONTAINER" -s "./main/dist/*" -d "$STORAGE_BUCKET" --account-name "$STORAGE_ACCOUNT" --recursive
+          az cdn endpoint purge --content-paths "/$STORAGE_BUCKET/*" --profile-name "$CDN_PROFILE" --name "$CDN_ENDPOINT" --resource-group "$RESOURCE_GROUP"
+
+    - name: Azure logout
+      shell: bash
+      uses: azure/CLI@v1
+      with:
+        inlineScript: az logout
