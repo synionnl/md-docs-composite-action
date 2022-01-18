@@ -94656,10 +94656,6 @@ var __webpack_exports__ = {};
 (__nccwpck_require__(2437).config)();
 
 const core = __nccwpck_require__(2186);
-//const { exec } = require('child_process');
-//const fs = require('fs')
-const path = __nccwpck_require__(7147)
-const util = __nccwpck_require__(3837);
 const glob = __nccwpck_require__(8090);
 
 const PATTERN = core.getInput('PATTERN');

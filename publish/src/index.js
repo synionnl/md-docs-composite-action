@@ -1,10 +1,6 @@
 require('dotenv').config();
 
 const core = require('@actions/core');
-//const { exec } = require('child_process');
-//const fs = require('fs')
-const path = require('fs')
-const util = require('util');
 const glob = require('@actions/glob');
 
 const PATTERN = core.getInput('PATTERN');
