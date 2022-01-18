@@ -38,7 +38,9 @@ runs:
         STORAGE_CONTAINER: ${{ inputs.azure_execution_storage_container }}
         STORAGE_BUCKET: ${{ github.repository }}
       with:
-        inlineScript: az storage azcopy blob download -c "$STORAGE_CONTAINER" -s "$STORAGE_BUCKET" -d ".temp/executions" --account-name "$STORAGE_ACCOUNT" --recursive
+        inlineScript: |
+          az config set extension.use_dynamic_install=yes_without_prompt
+          az storage azcopy blob download -c "$STORAGE_CONTAINER" -s "$STORAGE_BUCKET" -d ".temp/executions" --account-name "$STORAGE_ACCOUNT" --recursive
 
     - name: Setup Graphviz
       uses: ts-graphviz/setup-graphviz@v1
