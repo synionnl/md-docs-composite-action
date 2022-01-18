@@ -42,7 +42,7 @@ runs:
   
   steps:
     - name: Build
-      uses: ../build
+      uses: synionnl/md-docs-actions/build@main
       with:
           theme: ${{ inputs.theme }}
 
@@ -87,7 +87,6 @@ runs:
           az cdn endpoint purge --content-paths "/$STORAGE_BUCKET/*" --profile-name "$CDN_PROFILE" --name "$CDN_ENDPOINT" --resource-group "$RESOURCE_GROUP"
 
     - name: Azure logout
-      shell: bash
       uses: azure/CLI@v1
       with:
         inlineScript: az logout

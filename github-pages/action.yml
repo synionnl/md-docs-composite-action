@@ -23,7 +23,7 @@ runs:
   steps:
     
     - name: Build
-      uses: ../build
+      uses: synionnl/md-docs-actions/build@main
       with:
           theme: ${{ inputs.theme }}
 
