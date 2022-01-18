@@ -1,0 +1,32 @@
+{
+  "name": "publish-test-executions",
+  "version": "1.0.0",
+  "description": "Github action to scaffold and publish test exection files to Azure and trigger living documentation workflows.",
+  "main": "src/index.js",
+  "scripts": {
+    "exec": "node src/index.js",
+    "build": "ncc build src/index.js -o dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/synionnl/publish-test-executions.git"
+  },
+  "author": "Arjan Geertsema",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/synionnl/publish-test-executions/issues"
+  },
+  "homepage": "https://github.com/synionnl/publish-test-executions#readme",
+  "devDependencies": {
+    "@actions/core": "^1.6.0",
+    "@actions/github": "^5.0.0",
+    "@vercel/ncc": "^0.33.1",
+    "dotenv": "^10.0.0"
+  },
+  "dependencies": {
+    "@actions/glob": "^0.2.0",
+    "@azure/identity": "^2.0.1",
+    "@azure/storage-blob": "^12.8.0",
+    "js-yaml": "^4.1.0"
+  }
+}

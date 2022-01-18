@@ -1,0 +1,25 @@
+name: Publish test executions action
+description: Github action to publish test execution files to Azure and trigger living documentation workflow.
+author: Arjan Geertsema
+
+inputs:
+  github_token:
+    description: Github access token which is used to authenticate with the Github REST API. The REST API is used to dispatch an event.
+    required: true
+  azure_credentials:
+    description: Azure credentials which is used to authencticate with the Azure API.
+    required: true
+  azure_storage_account:
+    description: Id of the Azure storage account where to add the test execution files.
+    required: true
+  azure_storage_container:
+    description: Name of the Azure storage container where to create the test execution buckets and files.
+    required: true
+  pattern:
+    description: A glob pattern to match living documentation yaml files.
+    required: false
+    default: ./**/living-documentation.yml
+
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
