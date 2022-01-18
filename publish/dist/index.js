@@ -94297,17 +94297,20 @@ exports.getClient = function (credentials, account, container) {
                 return
             }
 
-            const items = [];
-            for await (const item of containerClient.listBlobsFlat({ prefix: bucket })) {
-                items.push(item.name);
+            const files = [];
+            for await (const blob of containerClient.listBlobsFlat({ prefix: bucket })) {
+                files.push(blob.name);
             }
-            
-            if (items.length) {
-                core.info(`Deleting ${items.length} blobs from bucket ${bucket}.`);
 
-                const batchClient = containerClient.getBlobBatchClient();
-                await batchClient.deleteBlobs(items.map(url => containerClient.getBlobClient(url)));
+            if (files.length === 0) {
+                core.info(`Bucket ${bucket} does not exist.`);
+                return;
             }
+
+            core.info(`Deleting ${files.length} blobs from bucket ${bucket}.`);
+
+            const batchClient = containerClient.getBlobBatchClient();
+            await batchClient.deleteBlobs(files.map(file => containerClient.getBlobClient(file)));
 
             core.info(`Bucket ${bucket} removed.`);
 
@@ -94342,7 +94345,7 @@ exports.getClient = function(token) {
         async dispatchEvent(owner, repo, event) {
             core.debug(`Dispatching event ${event} to repository ${owner}/${repo}.`)
             
-            octokit.rest.repos.createDispatchEvent({
+            await octokit.rest.repos.createDispatchEvent({
                 owner,
                 repo,
                 event_type: event
@@ -94356,7 +94359,6 @@ exports.getClient = function(token) {
 /***/ 3033:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
-const util = __nccwpck_require__(3837);
 const fs = __nccwpck_require__(7147);
 const path = __nccwpck_require__(1017);
 const yaml = __nccwpck_require__(1917);
@@ -94688,7 +94690,7 @@ async function run() {
         owner: e.git.owner,
         repo: e.git.repo
       }))
-      
+
     await triggerLivingDocumentationWorkflows(repositories);
   }
   catch (err) {
@@ -94698,7 +94700,7 @@ async function run() {
 
 async function getTestExecutions(files) {
   core.startGroup('Get test executions');
-  
+
   if (files.length === 0) {
     core.warning('No living documentation files found.');
     return;
@@ -94706,31 +94708,33 @@ async function getTestExecutions(files) {
 
   core.debug(`${files.length} living documentation files found.`);
 
-  const promisess = files
-    .map(async (file) => {
-      const ld = await ldClient.parseFile(file);
+  const executions = [];
 
-      if (ld.execution == null)
-        return [];
-      
-      core.debug(`${file} contains a reference to test execution file ${ld.execution.file}.`);
+  for (const file of files) {
+    const ld = await ldClient.parseFile(file);
 
-      if (ld.branches == undefined || ld.branches.length === 0)
-        core.warning(`No branches found in repository ${ld.owner}/${ld.repo} for commit ${ld.commit} or release ${ld.release}`);
+    if (ld.execution == null)
+      return [];
 
-      return ld.branches
-        .map(branch => ({
-          file: ld.execution.file,
-          bucket: `${ld.owner}/${ld.repo}/${branch}`,
-          git: {
-            owner: ld.owner,
-            repo: ld.repo,
-            branch: branch
-          }
-        }));
-    });
+    core.debug(`${file} contains a reference to test execution file ${ld.execution.file}.`);
 
-  const executions = (await Promise.all(promisess)).flat();
+    if (ld.branches == undefined || ld.branches.length === 0)
+      core.warning(`No branches found in repository ${ld.owner}/${ld.repo} for commit ${ld.commit} or release ${ld.release}`);
+
+    for (const branch of ld.branches) {
+      core.debug(`Adding execution bucket ${ld.owner}/${ld.repo}/${branch}.`);
+
+      executions.push({
+        file: ld.execution.file,
+        bucket: `${ld.owner}/${ld.repo}/${branch}`,
+        git: {
+          owner: ld.owner,
+          repo: ld.repo,
+          branch: branch
+        }
+      });
+    };
+  };
 
   core.info(`${executions.length} test execution files found.`);
 
@@ -94744,7 +94748,9 @@ async function removeBuckets(buckets) {
 
   buckets = [...new Map(buckets.map(item => [`${item.bucket}`, item])).values()];
 
-  await Promise.all(buckets.map(bucket => azureClient.removeBucket(bucket)));
+  for (const bucket of buckets) {
+    await buckets.map(bucket => azureClient.removeBucket(bucket));
+  };
 
   core.info(`${buckets.length} storage buckets removed.`);
 
@@ -94757,7 +94763,9 @@ async function uploadTestExecutionFiles(executions) {
   if (executions.length === 0)
     core.warning('No test executions found.');
 
-  await Promise.all(executions.map(execution => azureClient.upload(execution.bucket, execution.file)));
+  for (const execution of executions) {
+    await azureClient.upload(execution.bucket, execution.file);
+  };
 
   core.info(`${executions.length} test execution files uploaded.`);
 
@@ -94769,7 +94777,9 @@ async function triggerLivingDocumentationWorkflows(repositories) {
 
   repositories = [...new Map(repositories.map(item => [`${item.owner}|${item.repo}`, item])).values()];
 
-  await Promise.all(repositories.map(repository => githubClient.dispatchEvent(repository.owner, repository.repo, 'test-execution-changed')));
+  for (const repository of repositories) {
+    await githubClient.dispatchEvent(repository.owner, repository.repo, 'test-execution-changed');
+  };
 
   core.info(`${repositories.length} living documentation workflows triggered.`);
 

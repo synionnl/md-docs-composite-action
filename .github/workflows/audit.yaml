@@ -11,9 +11,11 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v2
+        
       - name: install dependencies
         working-directory: /workflows/publish
         run: npm ci
+      
       - uses: oke-py/npm-audit-action@v1.8.2
         with:
           audit_level: high

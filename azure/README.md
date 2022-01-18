@@ -4,6 +4,7 @@
 - name: Build and Deploy
   uses: synionnl/md-docs-actions/azure@v1
   with:
+    github_token: ${{ secrets.GITHUB_TOKEN }}
     azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
     azure_resource-group: synion
     azure_storage_account: synionstorage

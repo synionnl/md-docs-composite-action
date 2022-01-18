@@ -88686,7 +88686,7 @@ const AZURE_CREDENTIALS = core.getInput('AZURE_CREDENTIALS');
 const AZURE_STORAGE_ACCOUNT = core.getInput('AZURE_STORAGE_ACCOUNT');
 const AZURE_STORAGE_CONTAINER = core.getInput('AZURE_STORAGE_CONTAINER');
 
-const githubClient = (__nccwpck_require__(6697).getClient)(GITHUB_TOKEN, BUCKET);
+const githubClient = GITHUB_TOKEN != '' ? (__nccwpck_require__(6697).getClient)(GITHUB_TOKEN, BUCKET) : null;
 const azureClient = (__nccwpck_require__(7469).getClient)(AZURE_CREDENTIALS, AZURE_STORAGE_ACCOUNT, AZURE_STORAGE_CONTAINER);
 
 async function run() {
@@ -88704,11 +88704,13 @@ async function run() {
 
     core.endGroup();
 
-    core.startGroup('Purge');
+    if (githubClient != null) {
+      core.startGroup('Purge');
 
-    await purgeDeletedBranches(owner, repo, BUCKET);
+      await purgeDeletedBranches(owner, repo, BUCKET);
 
-    core.endGroup();
+      core.endGroup();
+    }
  
     core.startGroup('Download');
 

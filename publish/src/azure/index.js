@@ -22,17 +22,20 @@ exports.getClient = function (credentials, account, container) {
                 return
             }
 
-            const items = [];
-            for await (const item of containerClient.listBlobsFlat({ prefix: bucket })) {
-                items.push(item.name);
+            const files = [];
+            for await (const blob of containerClient.listBlobsFlat({ prefix: bucket })) {
+                files.push(blob.name);
             }
-            
-            if (items.length) {
-                core.info(`Deleting ${items.length} blobs from bucket ${bucket}.`);
 
-                const batchClient = containerClient.getBlobBatchClient();
-                await batchClient.deleteBlobs(items.map(url => containerClient.getBlobClient(url)));
+            if (files.length === 0) {
+                core.info(`Bucket ${bucket} does not exist.`);
+                return;
             }
+
+            core.info(`Deleting ${files.length} blobs from bucket ${bucket}.`);
+
+            const batchClient = containerClient.getBlobBatchClient();
+            await batchClient.deleteBlobs(files.map(file => containerClient.getBlobClient(file)));
 
             core.info(`Bucket ${bucket} removed.`);
 
