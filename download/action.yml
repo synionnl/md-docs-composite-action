@@ -3,6 +3,12 @@ description: Github action to download test execution files from Azure.
 author: Arjan Geertsema
 
 inputs:
+  github_token:
+    description: Github access token which is used to authenticate with the Github REST API. The REST API is used to dispatch an event.
+    required: true
+  bucket:
+    description: Bucket name to download from.
+    required: true
   azure_credentials:
     description: Azure credentials which is used to authencticate with the Azure API.
     required: true

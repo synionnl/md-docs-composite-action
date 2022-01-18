@@ -88393,12 +88393,9 @@ const core = __nccwpck_require__(2186);
 const github = __nccwpck_require__(5438);
 
 exports.getClient = function(token, repository) {
-    const octokit = github.getOctokit(token);
-    const owner = repository.split('/')[0];
-    const repo = repository.split('/')[1];
-
+    const octokit = github.getOctokit(token);    
     return {
-        async branches() {
+        async branches(owner, repo) {
             core.info(`Downloading branches from repository ${owner}/${repo}.`)
             
             const branches = [];
@@ -88418,9 +88415,7 @@ exports.getClient = function(token, repository) {
 
                 branches.push(...response.data.map(b => b.name));
             }
-            while (page > 0 && branches.length % 100 === 0)
-
-            
+            while (page > 0 && branches.length % 100 === 0);            
             
             core.info(`Downloaded ${branches.length} branches.`);
 
@@ -88685,19 +88680,21 @@ var __webpack_exports__ = {};
 const core = __nccwpck_require__(2186);
 const io = __nccwpck_require__(7436);
 
-const REPOSITORY = core.getInput('REPOSITORY');
+const BUCKET = core.getInput('BUCKET');
 const GITHUB_TOKEN = core.getInput('GITHUB_TOKEN');
 const AZURE_CREDENTIALS = core.getInput('AZURE_CREDENTIALS');
 const AZURE_STORAGE_ACCOUNT = core.getInput('AZURE_STORAGE_ACCOUNT');
 const AZURE_STORAGE_CONTAINER = core.getInput('AZURE_STORAGE_CONTAINER');
 
-const githubClient = (__nccwpck_require__(6697).getClient)(GITHUB_TOKEN, REPOSITORY);
+const githubClient = (__nccwpck_require__(6697).getClient)(GITHUB_TOKEN, BUCKET);
 const azureClient = (__nccwpck_require__(7469).getClient)(AZURE_CREDENTIALS, AZURE_STORAGE_ACCOUNT, AZURE_STORAGE_CONTAINER);
 
 async function run() {
   try {
     core.startGroup('Init');
-    
+
+    const owner = BUCKET.split('/')[0];
+    const repo = BUCKET.split('/')[1];    
     const dst = '.temp/executions';
 
     core.info(`Recreating destination ${dst}.`)
@@ -88709,13 +88706,13 @@ async function run() {
 
     core.startGroup('Purge');
 
-    await purgeDeletedBranches(REPOSITORY);
+    await purgeDeletedBranches(owner, repo, BUCKET);
 
     core.endGroup();
  
     core.startGroup('Download');
 
-    await azureClient.download(REPOSITORY, dst);
+    await azureClient.download(BUCKET, dst);
 
     core.endGroup();
   }
@@ -88724,8 +88721,8 @@ async function run() {
   }
 }
 
-async function purgeDeletedBranches(bucket) {
-  const branches = await githubClient.branches();
+async function purgeDeletedBranches(owner, repo, bucket) {
+  const branches = await githubClient.branches(owner, repo);
   await azureClient.purge(bucket, branches);
 }
 

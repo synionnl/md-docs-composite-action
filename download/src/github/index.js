@@ -2,12 +2,9 @@ const core = require('@actions/core');
 const github = require('@actions/github');
 
 exports.getClient = function(token, repository) {
-    const octokit = github.getOctokit(token);
-    const owner = repository.split('/')[0];
-    const repo = repository.split('/')[1];
-
+    const octokit = github.getOctokit(token);    
     return {
-        async branches() {
+        async branches(owner, repo) {
             core.info(`Downloading branches from repository ${owner}/${repo}.`)
             
             const branches = [];
@@ -27,9 +24,7 @@ exports.getClient = function(token, repository) {
 
                 branches.push(...response.data.map(b => b.name));
             }
-            while (page > 0 && branches.length % 100 === 0)
-
-            
+            while (page > 0 && branches.length % 100 === 0);            
             
             core.info(`Downloaded ${branches.length} branches.`);
 

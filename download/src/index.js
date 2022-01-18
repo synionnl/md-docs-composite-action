@@ -3,19 +3,21 @@ require('dotenv').config();
 const core = require('@actions/core');
 const io = require('@actions/io');
 
-const REPOSITORY = core.getInput('REPOSITORY');
+const BUCKET = core.getInput('BUCKET');
 const GITHUB_TOKEN = core.getInput('GITHUB_TOKEN');
 const AZURE_CREDENTIALS = core.getInput('AZURE_CREDENTIALS');
 const AZURE_STORAGE_ACCOUNT = core.getInput('AZURE_STORAGE_ACCOUNT');
 const AZURE_STORAGE_CONTAINER = core.getInput('AZURE_STORAGE_CONTAINER');
 
-const githubClient = require('./github').getClient(GITHUB_TOKEN, REPOSITORY);
+const githubClient = require('./github').getClient(GITHUB_TOKEN, BUCKET);
 const azureClient = require('./azure').getClient(AZURE_CREDENTIALS, AZURE_STORAGE_ACCOUNT, AZURE_STORAGE_CONTAINER);
 
 async function run() {
   try {
     core.startGroup('Init');
-    
+
+    const owner = BUCKET.split('/')[0];
+    const repo = BUCKET.split('/')[1];    
     const dst = '.temp/executions';
 
     core.info(`Recreating destination ${dst}.`)
@@ -27,13 +29,13 @@ async function run() {
 
     core.startGroup('Purge');
 
-    await purgeDeletedBranches(REPOSITORY);
+    await purgeDeletedBranches(owner, repo, BUCKET);
 
     core.endGroup();
  
     core.startGroup('Download');
 
-    await azureClient.download(REPOSITORY, dst);
+    await azureClient.download(BUCKET, dst);
 
     core.endGroup();
   }
@@ -42,8 +44,8 @@ async function run() {
   }
 }
 
-async function purgeDeletedBranches(bucket) {
-  const branches = await githubClient.branches();
+async function purgeDeletedBranches(owner, repo, bucket) {
+  const branches = await githubClient.branches(owner, repo);
   await azureClient.purge(bucket, branches);
 }
 

@@ -8,7 +8,8 @@ Github action to download test execution files from Azure.
 - name: Download test results
   uses: synionnl/md-docs-actions/download@v1
   with:
-    repository: ${{ github.repository }}
+    github_token: ${{ secrets.GITHUB_TOKEN }}
+    bucket: ${{ github.repository }}
     azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
     azure_storage_account: synionstorage
     azure_storage_container: test-excecutions
