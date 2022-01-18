@@ -7,11 +7,39 @@ inputs:
     description: Path to a theme css file.
     required: false
 
+  azure_credentials:
+    description: Azure credentials used to login.
+    required: false
+
+  azure_storage_account:
+    description: Name of the Azure storage account.
+    required: false
+
+  azure_execution_storage_container:
+    description: Name of the Azure storage test test-executions container inside the storage acount.
+    required: false
+
 runs:
 
   using: composite
 
   steps:
+    - name: Azure login
+      if: ${{ inputs.azure_credentials != '' }}
+      uses: azure/login@v1
+      with:
+        creds: ${{ inputs.azure_credentials }}
+
+    - name: Download test executions
+      if: ${{ inputs.azure_credentials != '' && inputs.azure_storage_account != '' && inputs.azure_execution_storage_container != '' }}
+      uses: azure/CLI@v1
+      env:
+        STORAGE_ACCOUNT: ${{ inputs.azure_storage_account }}
+        STORAGE_CONTAINER: ${{ inputs.azure_execution_storage_container }}
+        STORAGE_BUCKET: ${{ github.repository }}
+      with:
+        inlineScript: az storage azcopy blob download -c "$STORAGE_CONTAINER" -s "$STORAGE_BUCKET" -d ".temp/executions" --account-name "$STORAGE_ACCOUNT" --recursive
+
     - name: Setup Graphviz
       uses: ts-graphviz/setup-graphviz@v1
 
@@ -56,3 +84,9 @@ runs:
       if: always()
       shell: bash
       run: npm uninstall @synion/md-docs -g
+
+    - name: Azure logout
+      if: always()
+      uses: azure/CLI@v1
+      with:
+        inlineScript: az logout

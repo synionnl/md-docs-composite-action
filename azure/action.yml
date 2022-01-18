@@ -12,27 +12,31 @@ inputs:
     description: Azure credentials used to login.
     required: true
 
-  resource_group:
+  azure_resource_group:
     description: Name of the Azure resource group.
     required: true
 
-  storage_account:
+  azure_storage_account:
     description: Name of the Azure storage account.
     required: true
 
-  storage_container:
+  azure_storage_container:
     description: Name of the Azure storage container inside the storage acount.
     required: true
 
-  storage_bucket:
+  azure_execution_storage_container:
+    description: Name of the Azure storage test test-executions container inside the storage acount.
+    required: false
+
+  azure_storage_bucket:
     description: Directory where to deploy the generated website in the container. Defaults to empty which is the root.
     required: false
 
-  cdn_profile:
+  azure_cdn_profile:
     description: Name of the Azure cdn profile which is linked to the storage container.
     required: true
 
-  cdn_endpoint:
+  azure_cdn_endpoint:
     description: Name of the Azure cdn endpoint which is linked to the storage container.
     required: true
 
@@ -45,6 +49,9 @@ runs:
       uses: synionnl/md-docs-actions/build@main
       with:
           theme: ${{ inputs.theme }}
+          azure_credentials: ${{ inputs.azure_credentials }}
+          azure_storage_account: ${{ inputs.azure_storage_account }}
+          azure_execution_storage_container: ${{ inputs.azure_execution_storage_container }}
 
     - name: Azure login
       uses: azure/login@v1
@@ -52,41 +59,42 @@ runs:
         creds: ${{ inputs.azure_credentials }}
 
     - name: Deploy to Azure
-      if:  ${{ inputs.storage_bucket == null || inputs.storage_bucket  == '' }}
+      if:  ${{ inputs.azure_storage_bucket == null || inputs.azure_storage_bucket  == '' }}
       uses: azure/CLI@v1
       env:
-        RESOURCE_GROUP: ${{ inputs.resource_group }}
-        STORAGE_ACCOUNT: ${{ inputs.storage_account }}
-        STORAGE_CONTAINER: ${{ inputs.storage_container }}
-        CDN_PROFILE: ${{ inputs.cdn_profile }}
-        CDN_ENDPOINT: ${{ inputs.cdn_endpoint }}
+        RESOURCE_GROUP: ${{ inputs.azure_resource_group }}
+        STORAGE_ACCOUNT: ${{ inputs.azure_storage_account }}
+        STORAGE_CONTAINER: ${{ inputs.azure_storage_container }}
+        CDN_PROFILE: ${{ inputs.azure_cdn_profile }}
+        CDN_ENDPOINT: ${{ inputs.azure_cdn_endpoint }}
       with:
         inlineScript: |
           az config set extension.use_dynamic_install=yes_without_prompt
           az storage container create -n "$STORAGE_CONTAINER" --account-name "$STORAGE_ACCOUNT" --public-access container --auth-mode login
           az storage azcopy blob delete -c "$STORAGE_CONTAINER" --account-name "$STORAGE_ACCOUNT" --recursive
-          az storage azcopy blob upload -c "$STORAGE_CONTAINER" -s "./dist/*" --account-name "$STORAGE_ACCOUNT" --recursive
+          az storage azcopy blob upload -c "$STORAGE_CONTAINER" -s "dist/*" --account-name "$STORAGE_ACCOUNT" --recursive
           az cdn endpoint purge --content-paths  "/*" --profile-name "$CDN_PROFILE" --name "$CDN_ENDPOINT" --resource-group "$RESOURCE_GROUP"
 
     - name: Deploy bucket to Azure
-      if: ${{ inputs.storage_bucket != null && inputs.storage_bucket != '' }}
+      if: ${{ inputs.azure_storage_bucket != null && inputs.azure_storage_bucket != '' }}
       uses: azure/CLI@v1
       env:
-        RESOURCE_GROUP: ${{ inputs.resource_group }}
-        STORAGE_ACCOUNT: ${{ inputs.storage_account }}
-        STORAGE_CONTAINER: ${{ inputs.storage_container }}
-        STORAGE_BUCKET: ${{ inputs.storage_bucket }}
-        CDN_PROFILE: ${{ inputs.cdn_profile }}
-        CDN_ENDPOINT: ${{ inputs.cdn_endpoint }}
+        RESOURCE_GROUP: ${{ inputs.azure_resource_group }}
+        STORAGE_ACCOUNT: ${{ inputs.azure_storage_account }}
+        STORAGE_CONTAINER: ${{ inputs.azure_storage_container }}
+        STORAGE_BUCKET: ${{ inputs.azure_storage_bucket }}
+        CDN_PROFILE: ${{ inputs.azure_cdn_profile }}
+        CDN_ENDPOINT: ${{ inputs.azure_cdn_endpoint }}
       with:
         inlineScript: |
           az config set extension.use_dynamic_install=yes_without_prompt
           az storage container create -n "$STORAGE_CONTAINER" --account-name "$STORAGE_ACCOUNT" --public-access container --auth-mode login
           az storage azcopy blob delete -c "$STORAGE_CONTAINER" -t "$STORAGE_BUCKET" --account-name "$STORAGE_ACCOUNT" --recursive
-          az storage azcopy blob upload -c "$STORAGE_CONTAINER" -s "./dist/*" -d "$STORAGE_BUCKET" --account-name "$STORAGE_ACCOUNT" --recursive
+          az storage azcopy blob upload -c "$STORAGE_CONTAINER" -s "dist/*" -d "$STORAGE_BUCKET" --account-name "$STORAGE_ACCOUNT" --recursive
           az cdn endpoint purge --content-paths "/$STORAGE_BUCKET/*" --profile-name "$CDN_PROFILE" --name "$CDN_ENDPOINT" --resource-group "$RESOURCE_GROUP"
 
     - name: Azure logout
+      if: always()
       uses: azure/CLI@v1
       with:
         inlineScript: az logout
