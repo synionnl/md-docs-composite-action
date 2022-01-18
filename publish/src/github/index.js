@@ -8,7 +8,7 @@ exports.getClient = function(token) {
         async dispatchEvent(owner, repo, event) {
             core.debug(`Dispatching event ${event} to repository ${owner}/${repo}.`)
             
-            octokit.rest.repos.createDispatchEvent({
+            await octokit.rest.repos.createDispatchEvent({
                 owner,
                 repo,
                 event_type: event

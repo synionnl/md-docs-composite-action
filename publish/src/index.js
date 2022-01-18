@@ -30,7 +30,7 @@ async function run() {
         owner: e.git.owner,
         repo: e.git.repo
       }))
-      
+
     await triggerLivingDocumentationWorkflows(repositories);
   }
   catch (err) {
@@ -40,7 +40,7 @@ async function run() {
 
 async function getTestExecutions(files) {
   core.startGroup('Get test executions');
-  
+
   if (files.length === 0) {
     core.warning('No living documentation files found.');
     return;
@@ -48,31 +48,33 @@ async function getTestExecutions(files) {
 
   core.debug(`${files.length} living documentation files found.`);
 
-  const promisess = files
-    .map(async (file) => {
-      const ld = await ldClient.parseFile(file);
+  const executions = [];
 
-      if (ld.execution == null)
-        return [];
-      
-      core.debug(`${file} contains a reference to test execution file ${ld.execution.file}.`);
+  for (const file of files) {
+    const ld = await ldClient.parseFile(file);
 
-      if (ld.branches == undefined || ld.branches.length === 0)
-        core.warning(`No branches found in repository ${ld.owner}/${ld.repo} for commit ${ld.commit} or release ${ld.release}`);
+    if (ld.execution == null)
+      return [];
 
-      return ld.branches
-        .map(branch => ({
-          file: ld.execution.file,
-          bucket: `${ld.owner}/${ld.repo}/${branch}`,
-          git: {
-            owner: ld.owner,
-            repo: ld.repo,
-            branch: branch
-          }
-        }));
-    });
+    core.debug(`${file} contains a reference to test execution file ${ld.execution.file}.`);
 
-  const executions = (await Promise.all(promisess)).flat();
+    if (ld.branches == undefined || ld.branches.length === 0)
+      core.warning(`No branches found in repository ${ld.owner}/${ld.repo} for commit ${ld.commit} or release ${ld.release}`);
+
+    for (const branch of ld.branches) {
+      core.debug(`Adding execution bucket ${ld.owner}/${ld.repo}/${branch}.`);
+
+      executions.push({
+        file: ld.execution.file,
+        bucket: `${ld.owner}/${ld.repo}/${branch}`,
+        git: {
+          owner: ld.owner,
+          repo: ld.repo,
+          branch: branch
+        }
+      });
+    };
+  };
 
   core.info(`${executions.length} test execution files found.`);
 
@@ -86,7 +88,9 @@ async function removeBuckets(buckets) {
 
   buckets = [...new Map(buckets.map(item => [`${item.bucket}`, item])).values()];
 
-  await Promise.all(buckets.map(bucket => azureClient.removeBucket(bucket)));
+  for (const bucket of buckets) {
+    await buckets.map(bucket => azureClient.removeBucket(bucket));
+  };
 
   core.info(`${buckets.length} storage buckets removed.`);
 
@@ -99,7 +103,9 @@ async function uploadTestExecutionFiles(executions) {
   if (executions.length === 0)
     core.warning('No test executions found.');
 
-  await Promise.all(executions.map(execution => azureClient.upload(execution.bucket, execution.file)));
+  for (const execution of executions) {
+    await azureClient.upload(execution.bucket, execution.file);
+  };
 
   core.info(`${executions.length} test execution files uploaded.`);
 
@@ -111,7 +117,9 @@ async function triggerLivingDocumentationWorkflows(repositories) {
 
   repositories = [...new Map(repositories.map(item => [`${item.owner}|${item.repo}`, item])).values()];
 
-  await Promise.all(repositories.map(repository => githubClient.dispatchEvent(repository.owner, repository.repo, 'test-execution-changed')));
+  for (const repository of repositories) {
+    await githubClient.dispatchEvent(repository.owner, repository.repo, 'test-execution-changed');
+  };
 
   core.info(`${repositories.length} living documentation workflows triggered.`);
 
