@@ -5,7 +5,7 @@ Github action to publish test execution files to Azure and trigger living docume
 ## Use
 
 ```
-- name: Build and Deploy
+- name: Publish test results
   if: always()
   uses: synionnl/md-docs-actions/publish@v1
   with:
@@ -18,13 +18,13 @@ Github action to publish test execution files to Azure and trigger living docume
 
 ## Run
 
-```bash
-npm run build && node dist/index.js
+```
+npm run exec
 ```
 
 In order to run this action locally you need to register environment variables. [dotenv](https://www.npmjs.com/package/dotenv) is included in the package. With [dotenv](https://www.npmjs.com/package/dotenv) environment vraiables are automaticly loaded from an **.env** file.
 
-```bash
+```
 INPUT_GITHUB_TOKEN=
 INPUT_AZURE_CREDENTIALS=
 INPUT_AZURE_STORAGE_ACCOUNT=
