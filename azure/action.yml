@@ -52,7 +52,7 @@ runs:
         creds: ${{ inputs.azure_credentials }}
 
     - name: Deploy to Azure
-      if:  ${{ inputs.storage_bucket }} == null ||  ${{ inputs.storage_bucket }} == ''
+      if:  ${{ inputs.storage_bucket == null || inputs.storage_bucket  == '' }}
       uses: azure/CLI@v1
       env:
         RESOURCE_GROUP: ${{ inputs.resource_group }}
@@ -69,7 +69,7 @@ runs:
           az cdn endpoint purge --content-paths  "/*" --profile-name "$CDN_PROFILE" --name "$CDN_ENDPOINT" --resource-group "$RESOURCE_GROUP"
 
     - name: Deploy bucket to Azure
-      if: ${{ inputs.storage_bucket }}  != null && ${{ inputs.storage_bucket }} != ''
+      if: ${{ inputs.storage_bucket != null && inputs.storage_bucket != '' }}
       uses: azure/CLI@v1
       env:
         RESOURCE_GROUP: ${{ inputs.resource_group }}
