@@ -35,7 +35,7 @@ runs:
       shell: bash
       id: branches
       run: |
-        md-docs -b
+        md-docs -b -s gh-pages
         BRANCHES=$(cat ./dist/branches.json)
         echo "::set-output name=value::${BRANCHES//'%'/'%25'}"
 
