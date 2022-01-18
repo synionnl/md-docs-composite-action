@@ -1,0 +1,31 @@
+{
+  "name": "download-test-executions",
+  "version": "1.0.0",
+  "description": "Github action to download test exection files from Azure.",
+  "main": "src/index.js",
+  "scripts": {
+    "exec": "node src/index.js",
+    "build": "ncc build src/index.js -o dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/synionnl/md-docs-actions.git"
+  },
+  "author": "Arjan Geertsema",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/synionnl/md-docs-actions/issues"
+  },
+  "homepage": "https://github.com/synionnl/md-docs-actions#readme",
+  "devDependencies": {
+    "@actions/core": "^1.6.0",
+    "@actions/github": "^5.0.0",
+    "@azure/identity": "^2.0.1",
+    "@azure/storage-blob": "^12.8.0",
+    "@vercel/ncc": "^0.33.1",
+    "dotenv": "^10.0.0"
+  },
+  "dependencies": {
+    "@actions/io": "^1.1.1"
+  }
+}
