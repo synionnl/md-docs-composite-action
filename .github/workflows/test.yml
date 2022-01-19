@@ -14,7 +14,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       
-      - run: cd test-files/build      
       - uses: ./build
         with:
+          working_directory: ./test-files/build
+
+      - name: Deploy
+        uses: ./github/deploy
+        with:
+          destination_directory: products
           working_directory: ./test-files/build

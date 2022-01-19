@@ -10,6 +10,12 @@ inputs:
     description: Directory where to deploy the generated website. Defaults to empty which is the root.
     required: false
 
+  working_directory:
+    description: Working directory path.
+    required: false
+    default: ./
+
+
 runs:
 
   using: composite
@@ -20,5 +26,5 @@ runs:
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ github.token }}
-        publish_dir: dist
+        publish_dir: ${{ inputs.working_directory + 'dist' }}
         destination_dir: ${{ inputs.destination_directory }}
