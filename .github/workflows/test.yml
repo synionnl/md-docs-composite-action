@@ -32,7 +32,7 @@ jobs:
           storage_account: synionstorage
           storage_container: tests
           storage_bucket: test-deploy
-          cdn_resource-group: synion
+          cdn_resource_group: synion
           cdn_profile: synion-cdn
           cdn_endpoint: docs-synion-www
           working_directory: ./test-files/build

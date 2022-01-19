@@ -90,7 +90,7 @@ jobs:
           storage_account: synionstorage
           storage_container: docs-synion-nl
           storage_bucket: products        
-          cdn_resource-group: synion
+          cdn_resource_group: synion
           cdn_profile: synion-cdn
           cdn_endpoint: docs-synion-www
 
