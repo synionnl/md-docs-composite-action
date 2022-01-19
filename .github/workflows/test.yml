@@ -30,8 +30,8 @@ jobs:
         with:
           credentials: ${{ secrets.AZURE_CREDENTIALS }}
           storage_account: synionstorage
-          storage_container: docs-synion-nl
-          storage_bucket: test
+          storage_container: tests
+          storage_bucket: test-deploy
           cdn_resource-group: synion
           cdn_profile: synion-cdn
           cdn_endpoint: docs-synion-www
@@ -44,7 +44,7 @@ jobs:
           github_token: ${{ github.token }}
           credentials: ${{ secrets.AZURE_CREDENTIALS }}
           storage_account: synionstorage
-          storage_container: test-executions
+          storage_container: tests
           pattern: ./test-files/publish/**/living-documentation.yml
 
       - name: Download test results
@@ -52,6 +52,6 @@ jobs:
         with:
           credentials: ${{ secrets.AZURE_CREDENTIALS }}
           storage_account: synionstorage
-          storage_container: test-excecutions
+          storage_container: tests
           github_token: ${{ github.token }}
           repository: ${{ github.repository }}

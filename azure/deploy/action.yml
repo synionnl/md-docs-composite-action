@@ -37,7 +37,7 @@ inputs:
   working_directory:
     description: Working directory path.
     required: false
-    default: ./
+    default: .
 
 runs:
 
@@ -58,13 +58,13 @@ runs:
         CDN_RESOURCE_GROUP: ${{ inputs.cdn_resource_group }}
         CDN_PROFILE: ${{ inputs.cdn_profile }}
         CDN_ENDPOINT: ${{ inputs.cdn_endpoint }}
-        SOURCE: ${{ inputs.working_directory }} + 'dist/*'
+        SOURCE: ${{ inputs.working_directory }} + '/dist/*'
       with:
         inlineScript: |
           az config set extension.use_dynamic_install=yes_without_prompt
           az storage container create -n "$STORAGE_CONTAINER" --account-name "$STORAGE_ACCOUNT" --public-access container --auth-mode login
           az storage azcopy blob delete -c "$STORAGE_CONTAINER" --account-name "$STORAGE_ACCOUNT" --recursive
-          az storage azcopy blob upload -c "$STORAGE_CONTAINER" -s "${SOURCE}" --account-name "$STORAGE_ACCOUNT" --recursive
+          az storage azcopy blob upload -c "$STORAGE_CONTAINER" -s "$SOURCE" --account-name "$STORAGE_ACCOUNT" --recursive
           az cdn endpoint purge --content-paths  "/*" --profile-name "$CDN_PROFILE" --name "$CDN_ENDPOINT" --resource-group "$CDN_RESOURCE_GROUP"
 
     - name: Deploy bucket to Azure
@@ -77,13 +77,13 @@ runs:
         CDN_RESOURCE_GROUP: ${{ inputs.cdn_resource_group }}
         CDN_PROFILE: ${{ inputs.cdn_profile }}
         CDN_ENDPOINT: ${{ inputs.cdn_endpoint }}
-        SOURCE: ${{ inputs.working_directory }} + 'dist/*'
+        SOURCE: ${{ inputs.working_directory }} + '/dist/*'
       with:
         inlineScript: |
           az config set extension.use_dynamic_install=yes_without_prompt
           az storage container create -n "$STORAGE_CONTAINER" --account-name "$STORAGE_ACCOUNT" --public-access container --auth-mode login
           az storage azcopy blob delete -c "$STORAGE_CONTAINER" -t "$STORAGE_BUCKET" --account-name "$STORAGE_ACCOUNT" --recursive
-          az storage azcopy blob upload -c "$STORAGE_CONTAINER" -s "${SOURCE}" -d "$STORAGE_BUCKET" --account-name "$STORAGE_ACCOUNT" --recursive
+          az storage azcopy blob upload -c "$STORAGE_CONTAINER" -s "$SOURCE" -d "$STORAGE_BUCKET" --account-name "$STORAGE_ACCOUNT" --recursive
           az cdn endpoint purge --content-paths "/$STORAGE_BUCKET/*" --profile-name "$CDN_PROFILE" --name "$CDN_ENDPOINT" --resource-group "$CDN_RESOURCE_GROUP"
 
     - name: Azure logout
