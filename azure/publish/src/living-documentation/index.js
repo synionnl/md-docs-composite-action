@@ -29,9 +29,6 @@ async function getConfig(file) {
 }
 
 async function findTestResult(dir, config) {
-    if (config.results?.file == undefined)
-        return;
-    
     core.debug(`Find test result ${config.results.file}.`);
 
     const globber = await glob.create(`${dir}/**/${config.results.file}`);
