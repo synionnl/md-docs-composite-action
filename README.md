@@ -6,7 +6,7 @@
 * [Publish test results to Azure](./azure/publish)
 * [Download test results from Azure](./azure/download)
 
-## Build deploy to Github
+## Build and deploy to Github
 
 ```
 name: md-docs
@@ -48,7 +48,7 @@ jobs:
 
 ```
 
-## Build deploy to Azure
+## Build and deploy to Azure
 
 ```
 name: md-docs
