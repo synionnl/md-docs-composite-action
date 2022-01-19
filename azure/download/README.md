@@ -1,6 +1,6 @@
 # Download test results action
 
-Github action to download test results from Azure. This action also optionally purges stale bucket files when supplying github_token and repository inputs.
+Github action to download test results from Azure. This action also optionally purges stale bucket files when supplying a github_token.
 
 ## Use
 
@@ -8,11 +8,11 @@ Github action to download test results from Azure. This action also optionally p
 - name: Download test results
   uses: synionnl/md-docs-actions/azure/download@v1
   with:
+    repository: ${{ github.repository }}
     credentials: ${{ secrets.AZURE_CREDENTIALS }}
     storage_account: synionstorage
     storage_container: test-excecutions
     github_token: ${{ github.token }}
-    repository: ${{ github.repository }}
 ```
 
 ## Run

@@ -35,3 +35,22 @@ jobs:
           cdn_profile: synion-cdn
           cdn_endpoint: docs-synion-www
           working_directory: ./test-files/build
+
+      - name: Publish test results
+        if: always()
+        uses: ./azure/publish
+        with:
+          github_token: ${{ github.token }}
+          credentials: ${{ secrets.AZURE_CREDENTIALS }}
+          storage_account: synionstorage
+          storage_container: test-executions
+          pattern: ./test-files/publish/**/living-documentation.yml
+
+      - name: Download test results
+        uses: ./azure/download
+        with:
+          credentials: ${{ secrets.AZURE_CREDENTIALS }}
+          storage_account: synionstorage
+          storage_container: test-excecutions
+          github_token: ${{ github.token }}
+          repository: ${{ github.repository }}

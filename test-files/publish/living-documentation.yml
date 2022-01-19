@@ -1,0 +1,6 @@
+owner: synionnl
+repo: md-docs-actions
+branch: main
+results:
+    type: test
+    file: test.json
