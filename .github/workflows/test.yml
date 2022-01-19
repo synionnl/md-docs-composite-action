@@ -34,3 +34,4 @@ jobs:
           cdn_resource-group: synion
           cdn_profile: synion-cdn
           cdn_endpoint: docs-synion-www
+          working_directory: ./test-files/build
