@@ -16,7 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        working-directory: [ '/workflows/azure/download', '/workflows/azure/publish']
+        working-directory: [ 'azure/download', 'azure/publish']
         
     steps:
 
