@@ -9,7 +9,7 @@ Github action to publish test results to Azure and trigger GitHub living documen
   if: always()
   uses: synionnl/md-docs-actions/azure/publish@v1
   with:
-    github_token: ${{ secrets.GITHUB_TOKEN }}
+    github_token: ${{ secrets.MD_DOCS_GITHUB_TOKEN }}
     credentials: ${{ secrets.AZURE_CREDENTIALS }}
     storage_account: synionstorage
     storage_container: test-executions
@@ -39,7 +39,7 @@ You can use the [Azure CLI](https://github.com/Azure/login#configure-deployment-
 ```
 az login
 
-az ad sp create-for-rbac --name "md-docs-actions" --role "Storage Blob Data Contributor" --scopes /subscriptions/{subscription}/resourceGroups/{resource-group}/providers/Microsoft.Storage/storageAccounts/{storage-account}/blobServices/containers/{container}
+az ad sp create-for-rbac --name "md-docs-actions-azure" --role "Contributer" --scopes /subscriptions/{subscription}/resourceGroups/{resource-group} --sdk-auth
 ```
 
 

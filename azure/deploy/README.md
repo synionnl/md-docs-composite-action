@@ -12,3 +12,15 @@
     cdn_profile: synion-cdn
     cdn_endpoint: docs-synion-www
 ```
+
+
+## Run
+
+You can use the [Azure CLI](https://github.com/Azure/login#configure-deployment-credentials) to create Azure credentials. Be sure to specify the right [scope](https://docs.microsoft.com/nl-nl/azure/role-based-access-control/scope-overview).
+
+```
+az login
+
+az ad sp create-for-rbac --name "md-docs-actions-azure" --role "Contributer" --scopes /subscriptions/{subscription}/resourceGroups/{resource-group} --sdk-auth
+```
+

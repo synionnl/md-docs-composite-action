@@ -1,5 +1,5 @@
 owner: synionnl
-repo: md-docs-actions
+repo: synionnl/md-docs-actions/azure/download
 branch: main
 results:
     type: test

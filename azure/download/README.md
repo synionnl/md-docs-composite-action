@@ -36,5 +36,5 @@ You can use the [Azure CLI](https://github.com/Azure/login#configure-deployment-
 ```
 az login
 
-az ad sp create-for-rbac --name "md-docs-actions" --role "Storage Blob Data Contributor" --scopes /subscriptions/{subscription}/resourceGroups/{resource-group}/providers/Microsoft.Storage/storageAccounts/{storage-account}/blobServices/containers/{container}
+az ad sp create-for-rbac --name "md-docs-actions-azure" --role "Storage Blob Data Contributor" --scopes /subscriptions/{subscription}/resourceGroups/{resource-group} --sdk-auth
 ```
