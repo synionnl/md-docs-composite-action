@@ -6,7 +6,13 @@
 version: 2
 updates:
   - package-ecosystem: "npm"
-    directory: "/workflows/publish"
+    directory: "/workflows/azure/publish"
+    schedule:
+      interval: "daily"
+    assignees:
+      - "arjangeertsema"
+  - package-ecosystem: "npm"
+    directory: "/workflows/azure/download"
     schedule:
       interval: "daily"
     assignees:
