@@ -93,7 +93,7 @@ async function removeBuckets(buckets) {
     await azureClient.removeBucket(bucket);
   };
 
-  core.info(`${buckets.length} storage buckets removed.`);
+  core.info(`${buckets.length} buckets removed.`);
 
   core.endGroup();
 }
