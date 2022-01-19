@@ -1,0 +1,31 @@
+name: download test results
+
+description: Github action to download test results from Azure.
+
+author: Arjan Geertsema
+
+inputs:
+
+  credentials:
+    description: Azure credentials.
+    required: true
+
+  storage_account:
+    description: Name of the Azure storage account where the test execution container is located.
+    required: true
+
+  storage_container:
+    description: Name of the Azure storage container where test execution files are located.
+    required: true
+
+  github_token:
+    description: Github access token. Optional, is used for purging stale bucket files.
+    required: false
+
+  repository:
+    description: The name of the current Git repository (owner/repo). Optional, is used for purging stale bucket files.
+    required: false
+
+runs:
+  using: 'node12'
+  main: 'dist/index.js'

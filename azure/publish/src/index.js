@@ -5,12 +5,12 @@ const glob = require('@actions/glob');
 
 const PATTERN = core.getInput('PATTERN');
 const GITHUB_TOKEN = core.getInput('GITHUB_TOKEN');
-const AZURE_CREDENTIALS = core.getInput('AZURE_CREDENTIALS');
-const AZURE_STORAGE_ACCOUNT = core.getInput('AZURE_STORAGE_ACCOUNT');
-const AZURE_STORAGE_CONTAINER = core.getInput('AZURE_STORAGE_CONTAINER');
+const CREDENTIALS = core.getInput('CREDENTIALS');
+const STORAGE_ACCOUNT = core.getInput('STORAGE_ACCOUNT');
+const STORAGE_CONTAINER = core.getInput('STORAGE_CONTAINER');
 
 const githubClient = require('./github').getClient(GITHUB_TOKEN);
-const azureClient = require('./azure').getClient(AZURE_CREDENTIALS, AZURE_STORAGE_ACCOUNT, AZURE_STORAGE_CONTAINER);
+const azureClient = require('./azure').getClient(CREDENTIALS, STORAGE_ACCOUNT, STORAGE_CONTAINER);
 const ldClient = require('./living-documentation').getClient(githubClient);
 
 async function run() {
@@ -18,17 +18,17 @@ async function run() {
     const globber = await glob.create(PATTERN);
     const files = await globber.glob();
 
-    const executions = await getTestExecutions(files);
+    const results = await getTestResults(files);
 
-    const buckets = executions.map(e => e.bucket);
+    const buckets = results.map(result => result.bucket);
     await removeBuckets(buckets);
 
-    await uploadTestExecutionFiles(executions);
+    await uploadTestResults(results);
 
-    const repositories = executions
-      .map(e => ({
-        owner: e.git.owner,
-        repo: e.git.repo
+    const repositories = results
+      .map(execution => ({
+        owner: execution.git.owner,
+        repo: execution.git.repo
       }))
 
     await triggerLivingDocumentationWorkflows(repositories);
@@ -38,8 +38,8 @@ async function run() {
   }
 }
 
-async function getTestExecutions(files) {
-  core.startGroup('Get test executions');
+async function getTestResults(files) {
+  core.startGroup('Get test results');
 
   if (files.length === 0) {
     core.warning('No living documentation files found.');
@@ -48,24 +48,25 @@ async function getTestExecutions(files) {
 
   core.debug(`${files.length} living documentation files found.`);
 
-  const executions = [];
+  const results = [];
 
   for (const file of files) {
     const ld = await ldClient.parseFile(file);
 
-    if (ld.execution == null)
-      return [];
+    if (ld.results?.file == null)
+      return;
 
-    core.debug(`${file} contains a reference to test execution file ${ld.execution.file}.`);
+    core.debug(`${file} contains a reference to test result file ${ld.results.file}.`);
 
     if (ld.branches == undefined || ld.branches.length === 0)
       core.warning(`No branches found in repository ${ld.owner}/${ld.repo} for commit ${ld.commit} or release ${ld.release}`);
 
     for (const branch of ld.branches) {
-      core.debug(`Adding execution bucket ${ld.owner}/${ld.repo}/${branch}.`);
+      core.debug(`Adding test result ${ld.owner}/${ld.repo}/${branch}/${ld.results.type}.`);
 
-      executions.push({
-        file: ld.execution.file,
+      results.push({
+        type: ld.results.type,
+        file: ld.results.file,
         bucket: `${ld.owner}/${ld.repo}/${branch}`,
         git: {
           owner: ld.owner,
@@ -76,11 +77,11 @@ async function getTestExecutions(files) {
     };
   };
 
-  core.info(`${executions.length} test execution files found.`);
+  core.info(`${results.length} test results found.`);
 
   core.endGroup();
 
-  return executions;
+  return results;
 }
 
 async function removeBuckets(buckets) {
@@ -89,7 +90,7 @@ async function removeBuckets(buckets) {
   buckets = [...new Map(buckets.map(item => [`${item.bucket}`, item])).values()];
 
   for (const bucket of buckets) {
-    await buckets.map(bucket => azureClient.removeBucket(bucket));
+    await azureClient.removeBucket(bucket);
   };
 
   core.info(`${buckets.length} storage buckets removed.`);
@@ -97,17 +98,17 @@ async function removeBuckets(buckets) {
   core.endGroup();
 }
 
-async function uploadTestExecutionFiles(executions) {
-  core.startGroup('Upload files');
+async function uploadTestResults(results) {
+  core.startGroup('Upload test results');
 
-  if (executions.length === 0)
-    core.warning('No test executions found.');
+  if (results.length === 0)
+    core.warning('No test results found.');
 
-  for (const execution of executions) {
-    await azureClient.upload(execution.bucket, execution.file);
+  for (const result of results) {
+    await azureClient.upload(`${result.bucket}/${result.type}`, result.file);
   };
 
-  core.info(`${executions.length} test execution files uploaded.`);
+  core.info(`${results.length} test results uploaded.`);
 
   core.endGroup();
 }

@@ -46,7 +46,7 @@ exports.getClient = function (credentials, account, container) {
 
             const containerClient = blobServiceClient.getContainerClient(container);
             if (await containerClient.exists() === false) {
-                core.info(`Creating bucket container ${container}.`);
+                core.info(`Creating container ${container}.`);
                 await containerClient.create();
             }
 

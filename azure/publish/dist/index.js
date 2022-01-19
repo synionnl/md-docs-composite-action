@@ -94321,7 +94321,7 @@ exports.getClient = function (credentials, account, container) {
 
             const containerClient = blobServiceClient.getContainerClient(container);
             if (await containerClient.exists() === false) {
-                core.info(`Creating bucket container ${container}.`);
+                core.info(`Creating container ${container}.`);
                 await containerClient.create();
             }
 
@@ -94370,22 +94370,11 @@ exports.getClient = function(githubClient) {
         async parseFile(file) {
             core.debug(`Parsing living documentation file ${file}.`);
 
-            const config = await readFile(file);
+            const config = await getConfig(file);
 
-            const executionFile = config.execution.file;
-
-            core.debug(`Find execution file ${executionFile}.`);
-
-            const globber = await glob.create(`${path.dirname(file)}/**/${executionFile}`);
-            const files = await globber.glob();
-
-            if (files.length === 0) {
-                core.warning(`${executionFile} not found in ${path.dirname(file)}.`);
-                config.execution = null;
-                return config;
+            if (config.results != undefined) {
+                config.results.file = await findTestResult(path.dirname(file), config);
             }
-            
-            config.execution.file = files[0];
             
             config.branches = await getBranches(config, githubClient);
 
@@ -94394,16 +94383,34 @@ exports.getClient = function(githubClient) {
     };
 }
 
-async function readFile(file) {    
+async function getConfig(file) {    
     const content = await fs.promises.readFile(file);
     const json = yaml.load(content);
     return json;
+}
+
+async function findTestResult(dir, config) {
+    if (config.results?.file == undefined)
+        return;
+    
+    core.debug(`Find test result ${config.results.file}.`);
+
+    const globber = await glob.create(`${dir}/**/${config.results.file}`);
+    const files = await globber.glob();
+
+    if (files.length === 0) {
+        core.warning(`${config.results.file} not found in ${path.dirname(file)}.`);
+        return;
+    }
+    
+    return files[0];
 }
 
 async function getBranches(config, githubClient) {
     if (config.branch != undefined)
         return [ config.branch ];
     
+    //TODO: find branches based on config.hash or config.version
     throw new Error('Not implemented');
 }
 
@@ -94665,12 +94672,12 @@ const glob = __nccwpck_require__(8090);
 
 const PATTERN = core.getInput('PATTERN');
 const GITHUB_TOKEN = core.getInput('GITHUB_TOKEN');
-const AZURE_CREDENTIALS = core.getInput('AZURE_CREDENTIALS');
-const AZURE_STORAGE_ACCOUNT = core.getInput('AZURE_STORAGE_ACCOUNT');
-const AZURE_STORAGE_CONTAINER = core.getInput('AZURE_STORAGE_CONTAINER');
+const CREDENTIALS = core.getInput('CREDENTIALS');
+const STORAGE_ACCOUNT = core.getInput('STORAGE_ACCOUNT');
+const STORAGE_CONTAINER = core.getInput('STORAGE_CONTAINER');
 
 const githubClient = (__nccwpck_require__(6697).getClient)(GITHUB_TOKEN);
-const azureClient = (__nccwpck_require__(7469).getClient)(AZURE_CREDENTIALS, AZURE_STORAGE_ACCOUNT, AZURE_STORAGE_CONTAINER);
+const azureClient = (__nccwpck_require__(7469).getClient)(CREDENTIALS, STORAGE_ACCOUNT, STORAGE_CONTAINER);
 const ldClient = (__nccwpck_require__(3033).getClient)(githubClient);
 
 async function run() {
@@ -94678,17 +94685,17 @@ async function run() {
     const globber = await glob.create(PATTERN);
     const files = await globber.glob();
 
-    const executions = await getTestExecutions(files);
+    const results = await getTestResults(files);
 
-    const buckets = executions.map(e => e.bucket);
+    const buckets = results.map(result => result.bucket);
     await removeBuckets(buckets);
 
-    await uploadTestExecutionFiles(executions);
+    await uploadTestResults(results);
 
-    const repositories = executions
-      .map(e => ({
-        owner: e.git.owner,
-        repo: e.git.repo
+    const repositories = results
+      .map(execution => ({
+        owner: execution.git.owner,
+        repo: execution.git.repo
       }))
 
     await triggerLivingDocumentationWorkflows(repositories);
@@ -94698,8 +94705,8 @@ async function run() {
   }
 }
 
-async function getTestExecutions(files) {
-  core.startGroup('Get test executions');
+async function getTestResults(files) {
+  core.startGroup('Get test results');
 
   if (files.length === 0) {
     core.warning('No living documentation files found.');
@@ -94708,24 +94715,25 @@ async function getTestExecutions(files) {
 
   core.debug(`${files.length} living documentation files found.`);
 
-  const executions = [];
+  const results = [];
 
   for (const file of files) {
     const ld = await ldClient.parseFile(file);
 
-    if (ld.execution == null)
-      return [];
+    if (ld.results?.file == null)
+      return;
 
-    core.debug(`${file} contains a reference to test execution file ${ld.execution.file}.`);
+    core.debug(`${file} contains a reference to test result file ${ld.results.file}.`);
 
     if (ld.branches == undefined || ld.branches.length === 0)
       core.warning(`No branches found in repository ${ld.owner}/${ld.repo} for commit ${ld.commit} or release ${ld.release}`);
 
     for (const branch of ld.branches) {
-      core.debug(`Adding execution bucket ${ld.owner}/${ld.repo}/${branch}.`);
+      core.debug(`Adding test result ${ld.owner}/${ld.repo}/${branch}/${ld.results.type}.`);
 
-      executions.push({
-        file: ld.execution.file,
+      results.push({
+        type: ld.results.type,
+        file: ld.results.file,
         bucket: `${ld.owner}/${ld.repo}/${branch}`,
         git: {
           owner: ld.owner,
@@ -94736,11 +94744,11 @@ async function getTestExecutions(files) {
     };
   };
 
-  core.info(`${executions.length} test execution files found.`);
+  core.info(`${results.length} test results found.`);
 
   core.endGroup();
 
-  return executions;
+  return results;
 }
 
 async function removeBuckets(buckets) {
@@ -94749,7 +94757,7 @@ async function removeBuckets(buckets) {
   buckets = [...new Map(buckets.map(item => [`${item.bucket}`, item])).values()];
 
   for (const bucket of buckets) {
-    await buckets.map(bucket => azureClient.removeBucket(bucket));
+    await azureClient.removeBucket(bucket);
   };
 
   core.info(`${buckets.length} storage buckets removed.`);
@@ -94757,17 +94765,17 @@ async function removeBuckets(buckets) {
   core.endGroup();
 }
 
-async function uploadTestExecutionFiles(executions) {
-  core.startGroup('Upload files');
+async function uploadTestResults(results) {
+  core.startGroup('Upload test results');
 
-  if (executions.length === 0)
-    core.warning('No test executions found.');
+  if (results.length === 0)
+    core.warning('No test results found.');
 
-  for (const execution of executions) {
-    await azureClient.upload(execution.bucket, execution.file);
+  for (const result of results) {
+    await azureClient.upload(`${result.bucket}/${result.type}`, result.file);
   };
 
-  core.info(`${executions.length} test execution files uploaded.`);
+  core.info(`${results.length} test results uploaded.`);
 
   core.endGroup();
 }

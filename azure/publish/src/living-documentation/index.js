@@ -9,22 +9,11 @@ exports.getClient = function(githubClient) {
         async parseFile(file) {
             core.debug(`Parsing living documentation file ${file}.`);
 
-            const config = await readFile(file);
+            const config = await getConfig(file);
 
-            const executionFile = config.execution.file;
-
-            core.debug(`Find execution file ${executionFile}.`);
-
-            const globber = await glob.create(`${path.dirname(file)}/**/${executionFile}`);
-            const files = await globber.glob();
-
-            if (files.length === 0) {
-                core.warning(`${executionFile} not found in ${path.dirname(file)}.`);
-                config.execution = null;
-                return config;
+            if (config.results != undefined) {
+                config.results.file = await findTestResult(path.dirname(file), config);
             }
-            
-            config.execution.file = files[0];
             
             config.branches = await getBranches(config, githubClient);
 
@@ -33,15 +22,33 @@ exports.getClient = function(githubClient) {
     };
 }
 
-async function readFile(file) {    
+async function getConfig(file) {    
     const content = await fs.promises.readFile(file);
     const json = yaml.load(content);
     return json;
+}
+
+async function findTestResult(dir, config) {
+    if (config.results?.file == undefined)
+        return;
+    
+    core.debug(`Find test result ${config.results.file}.`);
+
+    const globber = await glob.create(`${dir}/**/${config.results.file}`);
+    const files = await globber.glob();
+
+    if (files.length === 0) {
+        core.warning(`${config.results.file} not found in ${path.dirname(file)}.`);
+        return;
+    }
+    
+    return files[0];
 }
 
 async function getBranches(config, githubClient) {
     if (config.branch != undefined)
         return [ config.branch ];
     
+    //TODO: find branches based on config.hash or config.version
     throw new Error('Not implemented');
 }

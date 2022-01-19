@@ -1,7 +1,7 @@
 {
-  "name": "download-test-executions",
+  "name": "download-test-results",
   "version": "1.0.0",
-  "description": "Github action to download test exection files from Azure.",
+  "description": "Github action to download test results from Azure.",
   "main": "src/index.js",
   "scripts": {
     "exec": "node src/index.js",

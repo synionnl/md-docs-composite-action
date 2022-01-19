@@ -88680,21 +88680,19 @@ var __webpack_exports__ = {};
 const core = __nccwpck_require__(2186);
 const io = __nccwpck_require__(7436);
 
-const BUCKET = core.getInput('BUCKET');
+const REPOSITORY = core.getInput('REPOSITORY');
 const GITHUB_TOKEN = core.getInput('GITHUB_TOKEN');
-const AZURE_CREDENTIALS = core.getInput('AZURE_CREDENTIALS');
-const AZURE_STORAGE_ACCOUNT = core.getInput('AZURE_STORAGE_ACCOUNT');
-const AZURE_STORAGE_CONTAINER = core.getInput('AZURE_STORAGE_CONTAINER');
+const CREDENTIALS = core.getInput('CREDENTIALS');
+const STORAGE_ACCOUNT = core.getInput('STORAGE_ACCOUNT');
+const STORAGE_CONTAINER = core.getInput('STORAGE_CONTAINER');
 
-const githubClient = GITHUB_TOKEN != '' ? (__nccwpck_require__(6697).getClient)(GITHUB_TOKEN, BUCKET) : null;
-const azureClient = (__nccwpck_require__(7469).getClient)(AZURE_CREDENTIALS, AZURE_STORAGE_ACCOUNT, AZURE_STORAGE_CONTAINER);
+const githubClient = GITHUB_TOKEN != '' ? (__nccwpck_require__(6697).getClient)(GITHUB_TOKEN) : null;
+const azureClient = (__nccwpck_require__(7469).getClient)(CREDENTIALS, STORAGE_ACCOUNT, STORAGE_CONTAINER);
 
 async function run() {
   try {
     core.startGroup('Init');
 
-    const owner = BUCKET.split('/')[0];
-    const repo = BUCKET.split('/')[1];    
     const dst = '.temp/executions';
 
     core.info(`Recreating destination ${dst}.`)
@@ -88705,16 +88703,19 @@ async function run() {
     core.endGroup();
 
     if (githubClient != null) {
+      const owner = REPOSITORY.split('/')[0];
+      const repo = REPOSITORY.split('/')[1];    
+      
       core.startGroup('Purge');
 
-      await purgeDeletedBranches(owner, repo, BUCKET);
+      await purgeDeletedBranches(owner, repo, REPOSITORY);
 
       core.endGroup();
     }
  
     core.startGroup('Download');
 
-    await azureClient.download(BUCKET, dst);
+    await azureClient.download(REPOSITORY, dst);
 
     core.endGroup();
   }
