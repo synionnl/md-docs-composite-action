@@ -32,7 +32,7 @@ runs:
 
     - name: Install md-docs
       shell: bash
-      run: npm install @synion/md-docs
+      run: npm install @synion/md-docs -g
 
     - name: Build branches
       shell: bash
@@ -58,4 +58,4 @@ runs:
     - name: Uninstall md-docs
       if: always()
       shell: bash
-      run: npm uninstall @synion/md-docs
+      run: npm uninstall @synion/md-docs -g
