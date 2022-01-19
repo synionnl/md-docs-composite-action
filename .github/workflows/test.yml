@@ -2,9 +2,8 @@ name: test
 
 on:
   workflow_dispatch: 
-  
-  pull_request:
-  
+  push:
+  pull_request:  
     types: [opened]
 
 jobs:
@@ -17,3 +16,5 @@ jobs:
       
       - run: cd test-files/build      
       - uses: ./build
+        with:
+          working_directory: ./test-files/build

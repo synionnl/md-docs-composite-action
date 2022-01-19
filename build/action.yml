@@ -10,6 +10,11 @@ inputs:
     description: Path to a theme css file.
     required: false
 
+  working_directory:
+    description: Working directory path.
+    required: false
+    default: ./
+
 runs:
 
   using: composite
@@ -31,10 +36,12 @@ runs:
         restore-keys: ${{ runner.os }}-@synion/md-docs
 
     - name: Install md-docs
+      working-directory: ${{ inputs.working_directory }}
       shell: bash
       run: npm install @synion/md-docs -g
 
     - name: Build branches
+      working-directory: ${{ inputs.working_directory }}
       shell: bash
       id: branches
       run: |
@@ -43,6 +50,7 @@ runs:
         echo "::set-output name=value::${BRANCHES//'%'/'%25'}"
 
     - name: Build websites
+      working-directory: ${{ inputs.working_directory }}
       shell: bash
       run: |
         git fetch
