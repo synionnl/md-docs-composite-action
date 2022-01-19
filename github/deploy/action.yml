@@ -26,5 +26,5 @@ runs:
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ github.token }}
-        publish_dir: ${{ inputs.working_directory + 'dist' }}
+        publish_dir: ${{ inputs.working_directory }} + 'dist'
         destination_dir: ${{ inputs.destination_directory }}

@@ -18,8 +18,19 @@ jobs:
         with:
           working_directory: ./test-files/build
 
-      - name: Deploy
+      - name: Github Deploy
         uses: ./github/deploy
         with:
           destination_directory: products
           working_directory: ./test-files/build
+
+      - name: Azure Deploy
+        uses: ./azure/deploy
+        with:
+          credentials: ${{ secrets.AZURE_CREDENTIALS }}
+          storage_account: synionstorage
+          storage_container: docs-synion-nl
+          storage_bucket: test
+          cdn_resource-group: synion
+          cdn_profile: synion-cdn
+          cdn_endpoint: docs-synion-www
