@@ -53,7 +53,7 @@ async function getTestResults(files) {
   for (const file of files) {
     const ld = await ldClient.parseFile(file);
     
-    if (ld.results?.file == undefined)
+    if (ld.results == undefined || ld.results.file == undefined)
       continue;
 
     core.debug(`${file} contains a reference to test result file ${ld.results.file}.`);
