@@ -94390,16 +94390,13 @@ async function getConfig(file) {
 }
 
 async function findTestResult(dir, config) {
-    if (config.results?.file == undefined)
-        return;
-    
     core.debug(`Find test result ${config.results.file}.`);
 
     const globber = await glob.create(`${dir}/**/${config.results.file}`);
     const files = await globber.glob();
 
     if (files.length === 0) {
-        core.warning(`${config.results.file} not found in ${path.dirname(file)}.`);
+        core.warning(`${config.results.file} not found in ${dir}.`);
         return;
     }
     
@@ -94719,9 +94716,9 @@ async function getTestResults(files) {
 
   for (const file of files) {
     const ld = await ldClient.parseFile(file);
-
-    if (ld.results?.file == null)
-      return;
+    
+    if (ld.results?.file == undefined)
+      continue;
 
     core.debug(`${file} contains a reference to test result file ${ld.results.file}.`);
 

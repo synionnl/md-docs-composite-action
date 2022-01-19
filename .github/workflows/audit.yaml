@@ -3,24 +3,32 @@ name: npm audit
 on:
   schedule:
     - cron: '0 0 * * *'
-
+      
 jobs:
+
   scan:
+
     name: npm audit
     runs-on: ubuntu-latest
     timeout-minutes: 5
+
+    strategy:
+      matrix:
+        working-directory: [ '/workflows/azure/download', '/workflows/azure/publish']
+        
     steps:
+
       - uses: actions/checkout@v2
         
       - name: install dependencies
-        working-directory: /workflows/publish
+        working-directory: ${{ matrix.working-directory }}
         run: npm ci
       
       - uses: oke-py/npm-audit-action@v1.8.2
         with:
           audit_level: high
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ github.token }}
           issue_assignees: arjangeertsema
           issue_labels: vulnerability,test
           dedupe_issues: true
-          working_directory: /workflows/publish
+          working_directory: ${{ matrix.working-directory }}

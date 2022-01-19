@@ -35,7 +35,7 @@ async function findTestResult(dir, config) {
     const files = await globber.glob();
 
     if (files.length === 0) {
-        core.warning(`${config.results.file} not found in ${path.dirname(file)}.`);
+        core.warning(`${config.results.file} not found in ${dir}.`);
         return;
     }
     
