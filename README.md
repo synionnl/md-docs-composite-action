@@ -1,5 +1,5 @@
 [![test](https://github.com/synionnl/md-docs-actions/actions/workflows/test.yml/badge.svg)](https://github.com/synionnl/md-docs-actions/actions/workflows/test.yml)
-[![audit](https://github.com/synionnl/md-docs-actions/actions/workflows/test.yml/badge.svg)](https://github.com/synionnl/md-docs-actions/actions/workflows/audit.yml)
+[![audit](https://github.com/synionnl/md-docs-actions/actions/workflows/audit.yml/badge.svg)](https://github.com/synionnl/md-docs-actions/actions/workflows/audit.yml)
 
 # md-docs actions
 
