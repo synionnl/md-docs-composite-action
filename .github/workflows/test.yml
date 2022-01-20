@@ -11,7 +11,7 @@ jobs:
 
     name: npm audit
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged === false
+    if: github.event.pull_request.merged == false
     timeout-minutes: 5
 
     strategy:
@@ -39,7 +39,7 @@ jobs:
     
     needs: audit
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged === false
+    if: github.event.pull_request.merged == false
     timeout-minutes: 10
   
     steps:
