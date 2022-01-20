@@ -1,14 +1,13 @@
 name: npm audit
 
-on:
-  workflow_dispatch: 
+on:   
     
   schedule:
     - cron: '0 0 * * *'
       
 jobs:
 
-  scan:
+  audit:
 
     name: npm audit
     runs-on: ubuntu-latest

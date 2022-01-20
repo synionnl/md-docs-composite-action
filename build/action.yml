@@ -28,13 +28,6 @@ runs:
       with:
         node-version: '16.x'
 
-    - name: Cache dependencies
-      uses: actions/cache@v2
-      with:
-        path: ./.npm
-        key: ${{ runner.os }}-@synion/md-docs
-        restore-keys: ${{ runner.os }}-@synion/md-docs
-
     - name: Install md-docs
       working-directory: ${{ inputs.working_directory }}
       shell: bash
