@@ -5,7 +5,7 @@ exports.getClient = function(token, repository) {
     const octokit = github.getOctokit(token);    
     return {
         async branches(owner, repo) {
-            core.info(`Downloading branches from repository ${owner}/${repo}.`)
+            core.info(`Downloading branches from repository ${owner}/${repo}.`);
             
             const branches = [];
 

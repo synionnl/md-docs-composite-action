@@ -18,7 +18,7 @@ async function run() {
 
     const dst = '.temp/executions';
 
-    core.info(`Recreating destination ${dst}.`)
+    core.info(`Recreating destination ${dst}.`);
 
     await io.rmRF(dst);
     await io.mkdirP(dst);

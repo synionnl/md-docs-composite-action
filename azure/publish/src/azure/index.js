@@ -19,7 +19,7 @@ exports.getClient = function (credentials, account, container) {
             const containerClient = blobServiceClient.getContainerClient(container);
             if (!await containerClient.exists()) {
                 core.info(`Container ${container} does not exist.`);
-                return
+                return;
             }
 
             const files = [];
