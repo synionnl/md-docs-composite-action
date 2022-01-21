@@ -7,37 +7,8 @@ on:
 
 jobs:
   
-  audit:
-
-    name: npm audit
-    runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == false
-    timeout-minutes: 5
-
-    strategy:
-      matrix:
-        working-directory: [ 'azure/download', 'azure/publish']
-        
-    steps:
-
-      - uses: actions/checkout@v2
-        
-      - name: install dependencies
-        working-directory: ${{ matrix.working-directory }}
-        run: npm ci
-      
-      - uses: oke-py/npm-audit-action@v1.8.2
-        with:
-          audit_level: high
-          github_token: ${{ github.token }}
-          issue_assignees: arjangeertsema
-          issue_labels: vulnerability,test
-          dedupe_issues: true
-          working_directory: ${{ matrix.working-directory }}
-
   test:
     
-    needs: audit
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == false
     timeout-minutes: 10
