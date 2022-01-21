@@ -1,11 +1,10 @@
 
 extraction:
-  csharp:
-    index:
-      solution: 
-        - backend/interactieve-shv.sln
   javascript:
     index:
+      exclude:
+        - azure/download/dist
+        - azure/publish/dist
       include:
         - azure/download/src
         - azure/publish/src
