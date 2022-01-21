@@ -7,5 +7,5 @@ extraction:
   javascript:
     index:
       include:
-        - azure/download
-        - azure/publish
+        - azure/download/src
+        - azure/publish/src

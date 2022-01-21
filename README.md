@@ -1,6 +1,7 @@
 [![test](https://github.com/synionnl/md-docs-actions/actions/workflows/test.yml/badge.svg)](https://github.com/synionnl/md-docs-actions/actions/workflows/test.yml)
 [![audit](https://github.com/synionnl/md-docs-actions/actions/workflows/audit.yml/badge.svg)](https://github.com/synionnl/md-docs-actions/actions/workflows/audit.yml)
 [![analyze](https://github.com/synionnl/md-docs-actions/actions/workflows/analyze.yml/badge.svg)](https://github.com/synionnl/md-docs-actions/actions/workflows/analyze.yml)
+[![alerts](https://img.shields.io/lgtm/alerts/g/synionnl/md-docs-actions.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/synionnl/md-docs-actions/alerts/)
 
 # md-docs actions
 
