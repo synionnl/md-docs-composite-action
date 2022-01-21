@@ -1,0 +1,11 @@
+
+extraction:
+  csharp:
+    index:
+      solution: 
+        - backend/interactieve-shv.sln
+  javascript:
+    index:
+      include:
+        - azure/download
+        - azure/publish

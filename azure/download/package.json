@@ -18,14 +18,14 @@
   },
   "homepage": "https://github.com/synionnl/md-docs-actions#readme",
   "devDependencies": {
+    "@vercel/ncc": "^0.33.1"
+  },
+  "dependencies": {
     "@actions/core": "^1.6.0",
     "@actions/github": "^5.0.0",
     "@azure/identity": "^2.0.1",
+    "@actions/io": "^1.1.1",
     "@azure/storage-blob": "^12.8.0",
-    "@vercel/ncc": "^0.33.1",
     "dotenv": "^10.0.0"
-  },
-  "dependencies": {
-    "@actions/io": "^1.1.1"
   }
 }

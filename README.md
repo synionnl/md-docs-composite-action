@@ -1,5 +1,6 @@
 [![test](https://github.com/synionnl/md-docs-actions/actions/workflows/test.yml/badge.svg)](https://github.com/synionnl/md-docs-actions/actions/workflows/test.yml)
 [![audit](https://github.com/synionnl/md-docs-actions/actions/workflows/audit.yml/badge.svg)](https://github.com/synionnl/md-docs-actions/actions/workflows/audit.yml)
+[![analyze](https://github.com/synionnl/md-docs-actions/actions/workflows/analyze.yml/badge.svg)](https://github.com/synionnl/md-docs-actions/actions/workflows/analyze.yml)
 
 # md-docs actions
 
@@ -14,7 +15,9 @@
 ```
 name: md-docs
 
-on: 
+on:
+  schedule:
+    - cron: '0 0 * * *'
   workflow_dispatch:
   push:
   repository_dispatch:
@@ -32,7 +35,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Download test results
+      - name: Download
         uses: synionnl/md-docs-actions/azure/download@v1
         with:
           credentials: ${{ secrets.AZURE_CREDENTIALS }}
@@ -56,7 +59,9 @@ jobs:
 ```
 name: md-docs
 
-on: 
+on:
+  schedule:
+    - cron: '0 0 * * *'
   workflow_dispatch:
   push:
   repository_dispatch:
@@ -67,14 +72,14 @@ jobs:
   md-docs:
 
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
 
     steps:
 
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Download test results
+      - name: Download
         uses: synionnl/md-docs-actions/azure/download@v1
         with:
           credentials: ${{ secrets.AZURE_CREDENTIALS }}
