@@ -1,0 +1,11 @@
+extraction:
+  javascript:
+    index:
+      exclude:
+        - azure/download/dist
+        - azure/publish/dist
+        - azure/download/node_modules
+        - azure/publish/node_modules
+      include:
+        - azure/download/src
+        - azure/publish/src
