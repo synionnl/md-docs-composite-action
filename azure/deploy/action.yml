@@ -22,18 +22,6 @@ inputs:
     description: Directory where to deploy the generated website in the container. Defaults to empty which is the root.
     required: false
 
-  cdn_resource_group:
-    description: Name of the Azure resource group where the CDN is located.
-    required: true
-
-  cdn_profile:
-    description: Name of the Azure CDN profile which is linked to the storage container.
-    required: true
-
-  cdn_endpoint:
-    description: Name of the Azure CDN endpoint which is linked to the storage container.
-    required: true
-
   working_directory:
     description: Working directory path.
     required: false
@@ -55,9 +43,6 @@ runs:
       env:
         STORAGE_ACCOUNT: ${{ inputs.storage_account }}
         STORAGE_CONTAINER: ${{ inputs.storage_container }}
-        CDN_RESOURCE_GROUP: ${{ inputs.cdn_resource_group }}
-        CDN_PROFILE: ${{ inputs.cdn_profile }}
-        CDN_ENDPOINT: ${{ inputs.cdn_endpoint }}
         WORKING_DIRECTORY: ${{ inputs.working_directory }}
       with:
         inlineScript: |
@@ -65,7 +50,6 @@ runs:
           az storage container create -n "$STORAGE_CONTAINER" --account-name "$STORAGE_ACCOUNT" --public-access container --auth-mode login
           az storage azcopy blob delete -c "$STORAGE_CONTAINER" --account-name "$STORAGE_ACCOUNT" --recursive
           az storage azcopy blob upload -c "$STORAGE_CONTAINER" -s "$WORKING_DIRECTORY/dist/*" --account-name "$STORAGE_ACCOUNT" --recursive
-          az cdn endpoint purge --content-paths  "/*" --profile-name "$CDN_PROFILE" --name "$CDN_ENDPOINT" --resource-group "$CDN_RESOURCE_GROUP"
 
     - name: Deploy bucket to Azure
       if: ${{ inputs.storage_bucket != null && inputs.storage_bucket != '' }}
@@ -74,9 +58,6 @@ runs:
         STORAGE_ACCOUNT: ${{ inputs.storage_account }}
         STORAGE_CONTAINER: ${{ inputs.storage_container }}
         STORAGE_BUCKET: ${{ inputs.storage_bucket }}
-        CDN_RESOURCE_GROUP: ${{ inputs.cdn_resource_group }}
-        CDN_PROFILE: ${{ inputs.cdn_profile }}
-        CDN_ENDPOINT: ${{ inputs.cdn_endpoint }}
         WORKING_DIRECTORY: ${{ inputs.working_directory }}
       with:
         inlineScript: |
@@ -84,7 +65,6 @@ runs:
           az storage container create -n "$STORAGE_CONTAINER" --account-name "$STORAGE_ACCOUNT" --public-access container --auth-mode login
           az storage azcopy blob delete -c "$STORAGE_CONTAINER" -t "$STORAGE_BUCKET" --account-name "$STORAGE_ACCOUNT" --recursive
           az storage azcopy blob upload -c "$STORAGE_CONTAINER" -s "$WORKING_DIRECTORY/dist/*" -d "$STORAGE_BUCKET" --account-name "$STORAGE_ACCOUNT" --recursive
-          az cdn endpoint purge --content-paths "/$STORAGE_BUCKET/*" --profile-name "$CDN_PROFILE" --name "$CDN_ENDPOINT" --resource-group "$CDN_RESOURCE_GROUP"
 
     - name: Azure logout
       if: always()

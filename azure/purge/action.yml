@@ -1,0 +1,73 @@
+name: md-docs Azure purge CDN
+
+description: Purge Azure CDN.
+
+author: Arjan Geertsema
+
+inputs:
+  
+  credentials:
+    description: Azure credentials used to login.
+    required: true
+
+  storage_bucket:
+    description: Directory where to deploy the generated website in the container. Defaults to empty which is the root.
+    required: false
+
+  cdn_resource_group:
+    description: Name of the Azure resource group where the CDN is located.
+    required: true
+
+  cdn_profile:
+    description: Name of the Azure CDN profile which is linked to the storage container.
+    required: true
+
+  cdn_endpoint:
+    description: Name of the Azure CDN endpoint which is linked to the storage container.
+    required: true
+
+  working_directory:
+    description: Working directory path.
+    required: false
+    default: .
+
+runs:
+
+  using: composite
+  
+  steps:
+    - name: Azure login
+      uses: azure/login@v1
+      with:
+        creds: ${{ inputs.credentials }}
+
+    - name: Deploy to Azure
+      if:  ${{ inputs.storage_bucket == null || inputs.storage_bucket  == '' }}
+      uses: azure/CLI@v1
+      env:
+        CDN_RESOURCE_GROUP: ${{ inputs.cdn_resource_group }}
+        CDN_PROFILE: ${{ inputs.cdn_profile }}
+        CDN_ENDPOINT: ${{ inputs.cdn_endpoint }}
+        WORKING_DIRECTORY: ${{ inputs.working_directory }}
+      with:
+        inlineScript: |
+          az cdn endpoint purge --content-paths  "/*" --profile-name "$CDN_PROFILE" --name "$CDN_ENDPOINT" --resource-group "$CDN_RESOURCE_GROUP"
+
+    - name: Deploy bucket to Azure
+      if: ${{ inputs.storage_bucket != null && inputs.storage_bucket != '' }}
+      uses: azure/CLI@v1
+      env:
+        STORAGE_BUCKET: ${{ inputs.storage_bucket }}
+        CDN_RESOURCE_GROUP: ${{ inputs.cdn_resource_group }}
+        CDN_PROFILE: ${{ inputs.cdn_profile }}
+        CDN_ENDPOINT: ${{ inputs.cdn_endpoint }}
+        WORKING_DIRECTORY: ${{ inputs.working_directory }}
+      with:
+        inlineScript: |
+          az cdn endpoint purge --content-paths "/$STORAGE_BUCKET/*" --profile-name "$CDN_PROFILE" --name "$CDN_ENDPOINT" --resource-group "$CDN_RESOURCE_GROUP"
+
+    - name: Azure logout
+      if: always()
+      uses: azure/CLI@v1
+      with:
+        inlineScript: az logout

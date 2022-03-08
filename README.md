@@ -98,6 +98,12 @@ jobs:
           credentials: ${{ secrets.AZURE_CREDENTIALS }}
           storage_account: synionstorage
           storage_container: docs-synion-nl
+          storage_bucket: products
+
+    - name: Purge CDN
+        uses: synionnl/md-docs-actions/azure/purge@v1
+        with:
+          credentials: ${{ secrets.AZURE_CREDENTIALS }}
           storage_bucket: products        
           cdn_resource_group: synion
           cdn_profile: synion-cdn
