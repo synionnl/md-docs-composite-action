@@ -39,8 +39,10 @@ runs:
       shell: bash
       id: branches
       run: |
+        pwd
         ls -laf
         md-docs -b -s gh-pages
+        pwd
         ls -laf
         BRANCHES=$(cat ./dist/branches.json)
         echo "::set-output name=value::${BRANCHES//'%'/'%25'}"
