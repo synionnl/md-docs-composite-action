@@ -21,7 +21,7 @@
     "@vercel/ncc": "^0.33.1"
   },
   "dependencies": {
-    "@actions/core": "^1.6.0",
+    "@actions/core": "^1.9.1",
     "@actions/github": "^2.2.0",
     "@actions/io": "^1.1.1",
     "@azure/identity": "^2.0.1",
