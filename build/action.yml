@@ -31,8 +31,7 @@ runs:
     - name: Install md-docs
       working-directory: ${{ inputs.working_directory }}
       shell: bash
-      run: |        
-        ls -laf
+      run: |
         npm install @synion/md-docs -g
 
     - name: Build branches
@@ -42,6 +41,7 @@ runs:
       run: |
         ls -laf
         md-docs -b -s gh-pages
+        ls -laf
         BRANCHES=$(cat ./dist/branches.json)
         echo "::set-output name=value::${BRANCHES//'%'/'%25'}"
 
