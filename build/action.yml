@@ -10,6 +10,10 @@ inputs:
     description: Path to a theme css file.
     required: false
 
+  skip_branches: 
+    description: Branche or branches which are skipped.
+    required: false
+
   working_directory:
     description: Working directory path.
     required: false
@@ -41,7 +45,7 @@ runs:
       run: |
         pwd
         ls -laf
-        md-docs -b -s gh-pages
+        md-docs -b -s gh-pages $SKIP_BRANCHES
         pwd
         ls -laf
         BRANCHES=$(cat ./dist/branches.json)
@@ -56,10 +60,11 @@ runs:
         for B in $(echo $BRANCHES | jq -r 'sort_by(.path) | .[].name')
         do
             git checkout "$B"
-            md-docs -t $THEME -s gh-pages
+            md-docs -t $THEME -s gh-pages $SKIP_BRANCHES
         done
       env:
         THEME: ${{ inputs.theme }}
+        SKIP_BRANCHES: ${{ inputs.skip_branches }}
         BRANCHES: ${{ steps.branches.outputs.value }}
 
     - name: Uninstall md-docs
