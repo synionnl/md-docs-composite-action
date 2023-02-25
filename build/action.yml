@@ -6,10 +6,6 @@ author: Arjan Geertsema
 
 inputs:
 
-  theme: 
-    description: Path to a theme css file.
-    required: false
-
   skip_branches: 
     description: Branche or branches which are skipped.
     required: false
@@ -50,6 +46,8 @@ runs:
         ls -laf
         BRANCHES=$(cat ./dist/branches.json)
         echo "::set-output name=value::${BRANCHES//'%'/'%25'}"
+      env:
+        SKIP_BRANCHES: ${{ inputs.skip_branches }}
 
     - name: Build websites
       working-directory: ${{ inputs.working_directory }}
@@ -60,10 +58,9 @@ runs:
         for B in $(echo $BRANCHES | jq -r 'sort_by(.path) | .[].name')
         do
             git checkout "$B"
-            md-docs -t $THEME -s gh-pages $SKIP_BRANCHES
+            md-docs -s gh-pages $SKIP_BRANCHES
         done
       env:
-        THEME: ${{ inputs.theme }}
         SKIP_BRANCHES: ${{ inputs.skip_branches }}
         BRANCHES: ${{ steps.branches.outputs.value }}
 
