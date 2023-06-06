@@ -6,8 +6,8 @@ author: Arjan Geertsema
 
 inputs:
 
-  theme: 
-    description: Path to a theme css file.
+  skip_branches: 
+    description: Branche or branches which are skipped.
     required: false
 
   working_directory:
@@ -41,11 +41,13 @@ runs:
       run: |
         pwd
         ls -laf
-        md-docs -b -s gh-pages
+        md-docs -b -s gh-pages $SKIP_BRANCHES
         pwd
         ls -laf
         BRANCHES=$(cat ./dist/branches.json)
         echo "::set-output name=value::${BRANCHES//'%'/'%25'}"
+      env:
+        SKIP_BRANCHES: ${{ inputs.skip_branches }}
 
     - name: Build websites
       working-directory: ${{ inputs.working_directory }}
@@ -55,11 +57,11 @@ runs:
         git fetch
         for B in $(echo $BRANCHES | jq -r 'sort_by(.path) | .[].name')
         do
-            git checkout "$B"
-            md-docs -t $THEME -s gh-pages
+          git checkout "$B"
+          md-docs -s gh-pages $SKIP_BRANCHES
         done
       env:
-        THEME: ${{ inputs.theme }}
+        SKIP_BRANCHES: ${{ inputs.skip_branches }}
         BRANCHES: ${{ steps.branches.outputs.value }}
 
     - name: Uninstall md-docs
