@@ -1,5 +1,0 @@
-(() => {
-    iFrameResize({}, 'iframe');
-})();
-
-

@@ -1,0 +1,1 @@
+window.x_md_docs_cli_branches = [{"name":"main","repository":"synionnl/md-docs-actions","url":"https://github.com/synionnl/md-docs-actions/blob/main","mainBranch":true,"path":"main/"},{"name":"bugfix/options","repository":"synionnl/md-docs-actions","url":"https://github.com/synionnl/md-docs-actions/blob/bugfix/options","mainBranch":false,"path":"bugfix/options/"}];
